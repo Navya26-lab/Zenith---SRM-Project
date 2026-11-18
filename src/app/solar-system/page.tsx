@@ -730,9 +730,21 @@ function CameraController({ isRideMode, targetSatrec, timeOffset, controlsRef, m
   return null;
 }
 
-function SolarSystemViewerContent() {
+function TargetLoader({ onTargetId }: { onTargetId: (id: string | null) => void }) {
   const searchParams = useSearchParams();
   const targetId = searchParams.get('target');
+  
+  useEffect(() => {
+    if (targetId) {
+      onTargetId(targetId);
+    }
+  }, [targetId, onTargetId]);
+  
+  return null;
+}
+
+export default function SolarSystemViewer() {
+  const [targetId, setTargetId] = useState<string | null>(null);
   const { timeOffset, setTimeOffset } = useRadarStore();
   
   const [tles, setTles] = useState<{satrec: satellite.SatRec, type: string, id: string, name: string}[]>([]);
@@ -842,6 +854,9 @@ function SolarSystemViewerContent() {
 
   return (
     <div className="w-full h-screen bg-black overflow-hidden relative">
+      <React.Suspense fallback={null}>
+        <TargetLoader onTargetId={setTargetId} />
+      </React.Suspense>
       {initialLoading && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black">
           <div className="text-4xl font-black text-white tracking-[0.5em] animate-pulse">INITIATING</div>
@@ -1340,12 +1355,4 @@ function SolarSystemViewerContent() {
 
     </div>
   );
-}
-
-export default function SolarSystemViewer() {
-  return (
-    <React.Suspense fallback={<div className='w-full h-screen bg-black flex items-center justify-center text-cyan-500'>Loading Solar System...</div>}>
-      <SolarSystemViewerContent />
-    </React.Suspense>
-  );
-}
+}

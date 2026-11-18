@@ -1,0 +1,563 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #05071a;
+    --bg2: #0a0e2e;
+    --navy: #0d1b4b;
+    --card: #111936;
+    --cyan: #00e5ff;
+    --purple: #7c3aed;
+    --violet: #a855f7;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --teal: #0891b2;
+    --dim: #94a3b8;
+    --white: #ffffff;
+  }
+
+  body { background: var(--bg); font-family: 'Space Grotesk', sans-serif; color: var(--white); overflow-x: hidden; }
+
+  #pres-root { width: 100%; min-height: 600px; background: var(--bg); position: relative; overflow: hidden; }
+
+  canvas#stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+
+  .slide { display: none; min-height: 580px; padding: 28px 32px 24px; position: relative; z-index: 1; flex-direction: column; animation: fadeSlide 0.6s ease forwards; }
+  .slide.active { display: flex; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-tag { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--cyan); text-transform: uppercase; margin-bottom: 4px; opacity: 0.8; }
+  .slide-title { font-size: 26px; font-weight: 700; color: var(--white); margin-bottom: 4px; line-height: 1.2; }
+  .accent-bar { width: 40px; height: 3px; background: var(--purple); border-radius: 2px; margin-bottom: 18px; }
+
+  .card { background: var(--card); border: 1px solid rgba(124,58,237,0.35); border-radius: 12px; padding: 14px 16px; }
+  .card-teal { border-color: rgba(8,145,178,0.4); }
+  .card-gold { border-color: rgba(245,158,11,0.4); }
+  .card-green { border-color: rgba(16,185,129,0.4); }
+  .card-cyan { border-color: rgba(0,229,255,0.4); }
+
+  .label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-family: 'Space Mono', monospace; }
+  .val { font-size: 22px; font-weight: 700; font-family: 'Space Mono', monospace; }
+  .dim { color: var(--dim); font-size: 12px; line-height: 1.6; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 1px; font-family: 'Space Mono', monospace; }
+  .pill-cyan { background: rgba(0,229,255,0.12); color: var(--cyan); border: 1px solid rgba(0,229,255,0.3); }
+  .pill-purple { background: rgba(124,58,237,0.15); color: var(--violet); border: 1px solid rgba(124,58,237,0.3); }
+  .pill-gold { background: rgba(245,158,11,0.12); color: var(--gold); border: 1px solid rgba(245,158,11,0.3); }
+  .pill-green { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+  .pill-teal { background: rgba(8,145,178,0.12); color: #22d3ee; border: 1px solid rgba(8,145,178,0.3); }
+
+  .step-num { font-size: 32px; font-weight: 700; font-family: 'Space Mono', monospace; color: var(--cyan); }
+  .step-title { font-size: 12px; font-weight: 700; color: var(--white); margin: 2px 0; }
+
+  .flow-row { display: flex; align-items: stretch; gap: 0; margin: 10px 0; }
+  .flow-box { background: var(--navy); border: 1px solid rgba(0,229,255,0.3); border-radius: 10px; padding: 12px; flex: 1; text-align: center; }
+  .flow-arrow { display: flex; align-items: center; padding: 0 6px; color: var(--purple); font-size: 18px; }
+
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; background: rgba(5,7,26,0.96); border-top: 1px solid rgba(124,58,237,0.2); position: sticky; bottom: 0; z-index: 99; }
+  .nav-btn { background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.4); color: var(--violet); padding: 7px 20px; border-radius: 8px; cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+  .nav-btn:hover { background: rgba(124,58,237,0.35); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-dots { display: flex; gap: 6px; align-items: center; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(148,163,184,0.3); cursor: pointer; transition: all 0.2s; }
+  .dot.on { background: var(--cyan); transform: scale(1.4); }
+  .slide-counter { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--dim); }
+
+  .progress-bar { height: 2px; background: rgba(124,58,237,0.2); position: relative; }
+  .progress-fill { height: 2px; background: linear-gradient(90deg, var(--purple), var(--cyan)); transition: width 0.4s ease; }
+
+  .tech-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .tech-row:last-child { border-bottom: none; }
+  .tech-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+
+  .stat-big { text-align: center; }
+  .stat-big .num { font-size: 36px; font-weight: 700; font-family: 'Space Mono', monospace; }
+  .stat-big .lbl { font-size: 10px; color: var(--dim); letter-spacing: 1px; font-family: 'Space Mono', monospace; }
+
+  .cover-title { font-size: 72px; font-weight: 700; line-height: 0.9; letter-spacing: -1px; font-family: 'Space Grotesk', sans-serif; }
+  .cover-sub { font-size: 13px; letter-spacing: 4px; color: var(--violet); font-family: 'Space Mono', monospace; margin: 10px 0 20px; }
+
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+
+  .feature-icon { font-size: 28px; margin-bottom: 6px; }
+  .feature-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+
+  .arch-box { border-radius: 10px; padding: 10px 12px; border: 1px solid; text-align: center; }
+
+  .challenge-card { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .prob { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 10px; }
+  .sol { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px; padding: 10px; }
+  .prob-label { font-size: 10px; color: #f87171; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-bottom: 4px; }
+  .sol-label { font-size: 10px; color: var(--green); font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-bottom: 4px; }
+
+  .url-box { background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.3); border-radius: 12px; padding: 14px 20px; text-align: center; margin: 10px 0; }
+
+  .closing-title { font-size: 80px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; letter-spacing: -2px; line-height: 1; }
+</style>
+
+<div id="pres-root">
+  <canvas id="stars"></canvas>
+
+  <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+
+  <!-- SLIDE 1: COVER -->
+  <div class="slide active" id="s1">
+    <div style="margin-top:10px">
+      <div class="badge-row">
+        <span class="pill pill-purple">🛸 AstralWeb Innovate · Aaruush '25</span>
+        <span class="pill pill-cyan">● Round 3</span>
+      </div>
+      <div class="cover-title" style="color:var(--white)">PROJECT<br><span style="color:var(--cyan)">ZENITH</span></div>
+      <div class="cover-sub">T H E &nbsp; C E L E S T I A L &nbsp; E Y E</div>
+      <p class="dim" style="max-width:520px;font-size:13px;line-height:1.7">An advanced browser-based 3D orbital mechanics engine, real-time satellite tracker &amp; deep-space simulator. Built entirely on Next.js 16, Three.js &amp; WebGL — runs at 60 FPS, zero installs.</p>
+    </div>
+    <div class="grid4" style="margin-top:auto;padding-top:24px">
+      <div class="card card-cyan stat-big">
+        <div class="num" style="color:var(--cyan)">60</div>
+        <div class="lbl">FPS</div>
+      </div>
+      <div class="card card-purple stat-big" style="border-color:rgba(168,85,247,0.4)">
+        <div class="num" style="color:var(--violet)">SGP4</div>
+        <div class="lbl">Orbital Math</div>
+      </div>
+      <div class="card card-teal stat-big">
+        <div class="num" style="color:#22d3ee">3</div>
+        <div class="lbl">Modules</div>
+      </div>
+      <div class="card card-gold stat-big">
+        <div class="num" style="color:var(--gold)">∞</div>
+        <div class="lbl">Space</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: OVERVIEW -->
+  <div class="slide" id="s2">
+    <div class="slide-tag">Overview</div>
+    <div class="slide-title">What is Project Zenith?</div>
+    <div class="accent-bar"></div>
+    <div class="grid2" style="gap:16px;flex:1">
+      <div>
+        <div class="card" style="margin-bottom:12px;border-color:rgba(124,58,237,0.4)">
+          <div class="label" style="color:var(--cyan);margin-bottom:8px">Mission Statement</div>
+          <p style="font-size:13px;line-height:1.7;color:var(--white)">Project Zenith is a high-performance, web-based space tracking platform designed to make orbital mechanics and deep-space exploration accessible — <span style="color:var(--cyan)">directly inside your browser</span>.</p>
+          <p style="font-size:13px;line-height:1.7;color:var(--dim);margin-top:8px">It processes complex SGP4 orbital propagation mathematics in real time, delivering a seamless <span style="color:var(--gold)">60 FPS</span> experience with zero native installs required.</p>
+        </div>
+        <div class="card" style="border-color:rgba(168,85,247,0.3);padding:10px 14px">
+          <p style="font-size:11px;font-style:italic;color:var(--violet);line-height:1.6">"The universe is under no obligation to make sense to you. But Zenith will try."</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-cyan">
+          <div class="label" style="color:var(--cyan);margin-bottom:4px">🌐 Global Radar</div>
+          <div class="dim">Real-time 3D satellite tracking on a holographic globe</div>
+        </div>
+        <div class="card card-teal">
+          <div class="label" style="color:#22d3ee;margin-bottom:4px">🪐 Solar System Viewer</div>
+          <div class="dim">Mathematically accurate deep-space 3D simulation</div>
+        </div>
+        <div class="card" style="border-color:rgba(168,85,247,0.35)">
+          <div class="label" style="color:var(--violet);margin-bottom:4px">🖥️ Command Center</div>
+          <div class="dim">AI chatbot, live space news &amp; interactive knowledge hub</div>
+        </div>
+        <div class="card card-green" style="margin-top:auto">
+          <div class="label" style="color:var(--green);margin-bottom:4px">⚡ Deployed Live</div>
+          <div class="dim" style="font-family:'Space Mono',monospace;font-size:11px">project-zenith-srm.vercel.app</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: TECH STACK -->
+  <div class="slide" id="s3">
+    <div class="slide-tag">Technical Architecture</div>
+    <div class="slide-title">What We Used &amp; Why</div>
+    <div class="accent-bar"></div>
+    <div class="grid2" style="gap:14px;flex:1">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" style="border-color:rgba(168,85,247,0.4)">
+          <div class="label" style="color:var(--violet);margin-bottom:8px">⚡ Core Framework</div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--violet)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">Next.js 16.2.9</div><div class="dim">App Router, SSR/SSG, Turbopack dev, Vercel-native</div></div></div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--violet)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">TypeScript</div><div class="dim">Type safety across orbital math codebase</div></div></div>
+        </div>
+        <div class="card card-cyan">
+          <div class="label" style="color:var(--cyan);margin-bottom:8px">🌌 3D Rendering Engine</div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--cyan)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">Three.js</div><div class="dim">Core WebGL — scenes, meshes, PBR materials</div></div></div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--cyan)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">@react-three/fiber + drei</div><div class="dim">Declarative 3D in JSX + camera helpers</div></div></div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--cyan)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">react-globe.gl</div><div class="dim">Geospatial satellite data on 3D globe</div></div></div>
+        </div>
+        <div class="card card-gold">
+          <div class="label" style="color:var(--gold);margin-bottom:8px">🛰 Orbital Mathematics</div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--gold)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">satellite.js (SGP4)</div><div class="dim">Same algorithm NORAD uses to track real satellites</div></div></div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--gold)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">Web Workers</div><div class="dim">orbitalWorker.ts — off-main-thread math</div></div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" style="border-color:rgba(6,182,212,0.35)">
+          <div class="label" style="color:#22d3ee;margin-bottom:8px">🎨 Styling</div>
+          <div class="tech-row"><div class="tech-dot" style="background:#22d3ee"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">Tailwind CSS v4</div><div class="dim">Utility-first; custom glassmorphism tokens</div></div></div>
+          <div class="tech-row"><div class="tech-dot" style="background:#22d3ee"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">Vanilla CSS</div><div class="dim">Neon glow effects, custom scrollbars</div></div></div>
+        </div>
+        <div class="card card-green">
+          <div class="label" style="color:var(--green);margin-bottom:8px">🧠 State &amp; Motion</div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--green)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">Zustand</div><div class="dim">1KB global state — radar, time-offsets, targets</div></div></div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--green)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">Framer Motion</div><div class="dim">Spring animations, panel sliding</div></div></div>
+        </div>
+        <div class="card" style="border-color:rgba(245,158,11,0.3)">
+          <div class="label" style="color:var(--gold);margin-bottom:8px">🚀 Deployment</div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--gold)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">Vercel Edge Network</div><div class="dim">Global CDN, zero-config CI/CD</div></div></div>
+          <div class="tech-row"><div class="tech-dot" style="background:var(--gold)"></div><div><div style="font-size:12px;font-weight:700;color:var(--white)">lucide-react</div><div class="dim">Icon system throughout the UI</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: WHY WE CHOSE THESE -->
+  <div class="slide" id="s4">
+    <div class="slide-tag">Design Rationale</div>
+    <div class="slide-title">Why We Chose Each Technology</div>
+    <div class="accent-bar"></div>
+    <div class="grid2" style="gap:10px;flex:1">
+      <div class="card card-cyan"><div class="label" style="color:var(--cyan);margin-bottom:5px">Why Next.js 16?</div><p class="dim">App Router enables server components for fast initial loads. Turbopack speeds up dev iteration. Vercel deployment is seamless — no config needed for edge delivery.</p></div>
+      <div class="card" style="border-color:rgba(0,229,255,0.3)"><div class="label" style="color:var(--cyan);margin-bottom:5px">Why Three.js + R3F?</div><p class="dim">Three.js is the industry standard for browser WebGL. React Three Fiber turns 3D into declarative JSX — the same component model we already know, applied to 3D.</p></div>
+      <div class="card card-gold"><div class="label" style="color:var(--gold);margin-bottom:5px">Why satellite.js (SGP4)?</div><p class="dim">SGP4 is the <span style="color:var(--gold)">exact algorithm</span> used by NORAD and CelesTrak. Our orbit predictions are mathematically identical to real-world tracking systems.</p></div>
+      <div class="card" style="border-color:rgba(245,158,11,0.3)"><div class="label" style="color:var(--gold);margin-bottom:5px">Why Web Workers?</div><p class="dim">Trajectory propagation for hundreds of satellites is CPU-heavy. Offloading to orbitalWorker.ts keeps the main thread free — preserving <span style="color:var(--cyan)">60 FPS</span> regardless of compute load.</p></div>
+      <div class="card card-green"><div class="label" style="color:var(--green);margin-bottom:5px">Why Zustand?</div><p class="dim">1KB, zero boilerplate. Handles complex shared state between radar globe, sidebar filters, time-machine, and user location — without Redux overhead.</p></div>
+      <div class="card" style="border-color:rgba(16,185,129,0.3)"><div class="label" style="color:var(--green);margin-bottom:5px">Why Tailwind CSS v4?</div><p class="dim">Utility classes allow pixel-perfect glassmorphism and neon glow effects at speed. v4's native CSS variables enable our custom design tokens to cascade naturally.</p></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: ARCHITECTURE -->
+  <div class="slide" id="s5">
+    <div class="slide-tag">System Architecture</div>
+    <div class="slide-title">How It All Fits Together</div>
+    <div class="accent-bar"></div>
+    <div style="border:1px solid rgba(0,229,255,0.3);border-radius:14px;padding:14px;background:rgba(8,14,46,0.8);flex:1;display:flex;flex-direction:column;gap:12px">
+      <div class="label" style="color:var(--cyan)">Browser Client — Next.js 16 App Router</div>
+      <div class="grid3" style="flex:1">
+        <div style="background:rgba(13,27,75,0.8);border:1px solid rgba(168,85,247,0.4);border-radius:10px;padding:12px">
+          <div class="label" style="color:var(--violet);margin-bottom:6px">/ Homepage</div>
+          <div class="dim" style="font-size:10px;margin-bottom:6px;font-style:italic">Command Center</div>
+          <div style="font-size:11px;color:var(--dim);line-height:1.9">▸ Orion AI Chatbot<br>▸ News Feed<br>▸ Knowledge Base<br>▸ Zero-G Game</div>
+        </div>
+        <div style="background:rgba(13,27,75,0.8);border:1px solid rgba(0,229,255,0.4);border-radius:10px;padding:12px">
+          <div class="label" style="color:var(--cyan);margin-bottom:6px">/radar</div>
+          <div class="dim" style="font-size:10px;margin-bottom:6px;font-style:italic">Satellite Tracker</div>
+          <div style="font-size:11px;color:var(--dim);line-height:1.9">▸ react-globe.gl<br>▸ SGP4 Math<br>▸ Web Worker<br>▸ Sky Visibility</div>
+        </div>
+        <div style="background:rgba(13,27,75,0.8);border:1px solid rgba(245,158,11,0.4);border-radius:10px;padding:12px">
+          <div class="label" style="color:var(--gold);margin-bottom:6px">/solar-system</div>
+          <div class="dim" style="font-size:10px;margin-bottom:6px;font-style:italic">Deep Space Viewer</div>
+          <div style="font-size:11px;color:var(--dim);line-height:1.9">▸ Three.js Scene<br>▸ PBR Planets<br>▸ Mission Tracks<br>▸ NASA EPIC API</div>
+        </div>
+      </div>
+      <div style="background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.3);border-radius:8px;padding:10px;text-align:center">
+        <span class="label" style="color:#22d3ee;font-size:10px">Shared Layer: &nbsp;</span>
+        <span class="dim" style="font-size:10px">Zustand State &nbsp;·&nbsp; Framer Motion &nbsp;·&nbsp; Tailwind CSS v4 &nbsp;·&nbsp; TypeScript &nbsp;·&nbsp; Lucide Icons</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: RADAR DEEP DIVE -->
+  <div class="slide" id="s6">
+    <div class="slide-tag">Feature Deep Dive</div>
+    <div class="slide-title">🌐 The Global Radar System <span style="color:var(--dim);font-size:14px">/radar</span></div>
+    <div class="accent-bar"></div>
+    <div class="flow-row" style="margin-bottom:14px">
+      <div class="flow-box"><div class="label" style="color:var(--cyan);margin-bottom:4px">1</div><div style="font-size:11px;font-weight:700;color:var(--white)">Live TLE Data</div><div class="dim" style="font-size:10px;margin-top:3px">CelesTrak API feeds TLE sets for ISS, Starlink, Hubble, debris</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box"><div class="label" style="color:var(--cyan);margin-bottom:4px">2</div><div style="font-size:11px;font-weight:700;color:var(--white)">SGP4 Propagation</div><div class="dim" style="font-size:10px;margin-top:3px">satellite.js computes exact Lat/Lon/Alt at any timestamp</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box"><div class="label" style="color:var(--cyan);margin-bottom:4px">3</div><div style="font-size:11px;font-weight:700;color:var(--white)">Web Worker</div><div class="dim" style="font-size:10px;margin-top:3px">orbitalWorker.ts runs off main thread — zero UI jank</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box"><div class="label" style="color:var(--cyan);margin-bottom:4px">4</div><div style="font-size:11px;font-weight:700;color:var(--white)">Globe Render</div><div class="dim" style="font-size:10px;margin-top:3px">Holographic 3D Earth with bump map, day/night, clouds</div></div>
+    </div>
+    <div class="grid2" style="gap:10px;flex:1">
+      <div class="card card-cyan"><div class="label" style="color:var(--cyan);margin-bottom:4px">🛰️ Multi-Constellation</div><div class="dim">ISS · Starlink · Hubble · Space Debris — filterable glassmorphic sidebar</div></div>
+      <div class="card" style="border-color:rgba(0,229,255,0.3)"><div class="label" style="color:var(--cyan);margin-bottom:4px">📍 User Localization</div><div class="dim">Browser GPS plots your location with a neon beacon on the globe</div></div>
+      <div class="card card-cyan"><div class="label" style="color:var(--cyan);margin-bottom:4px">👁️ Sky Visibility Engine</div><div class="dim">Calculates horizon angle to tell if a satellite is visible from your house tonight</div></div>
+      <div class="card" style="border-color:rgba(0,229,255,0.3)"><div class="label" style="color:var(--cyan);margin-bottom:4px">⏱️ Zenith Time Machine</div><div class="dim">Zustand-powered slider — fast-forward or rewind orbital positions</div></div>
+      <div class="card card-cyan"><div class="label" style="color:var(--cyan);margin-bottom:4px">🔭 3D Model Preview</div><div class="dim">Inspect fully-textured 3D satellite models inline within the radar</div></div>
+      <div class="card" style="border-color:rgba(0,229,255,0.3)"><div class="label" style="color:var(--cyan);margin-bottom:4px">📡 Live Camera Sim</div><div class="dim">Sci-fi simulated noisy video feed panel from the target satellite</div></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: SOLAR SYSTEM -->
+  <div class="slide" id="s7">
+    <div class="slide-tag">Feature Deep Dive</div>
+    <div class="slide-title">🪐 Deep Space Solar System Viewer <span style="color:var(--dim);font-size:14px">/solar-system</span></div>
+    <div class="accent-bar"></div>
+    <div class="grid3" style="gap:12px;flex:1">
+      <div class="card card-gold" style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div class="feature-icon">🌍</div>
+        <div class="feature-title" style="color:var(--gold)">8 Planets</div>
+        <div class="dim">Mercury → Neptune with accurate speeds, tilt angles, and PBR textures</div>
+      </div>
+      <div class="card card-gold" style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div class="feature-icon">☄️</div>
+        <div class="feature-title" style="color:var(--gold)">Asteroid Belt</div>
+        <div class="dim">Procedurally generated thousands of asteroids with rotational momentum</div>
+      </div>
+      <div class="card card-gold" style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div class="feature-icon">🚀</div>
+        <div class="feature-title" style="color:var(--gold)">Live Missions</div>
+        <div class="dim">JWST · SMAP · ISS · Voyager · Mars Perseverance — real estimated positions</div>
+      </div>
+      <div class="card card-gold" style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div class="feature-icon">📸</div>
+        <div class="feature-title" style="color:var(--gold)">NASA EPIC API</div>
+        <div class="dim">Latest true-color Earth photo from DSCOVR satellite, projected on globe</div>
+      </div>
+      <div class="card card-gold" style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div class="feature-icon">⏩</div>
+        <div class="feature-title" style="color:var(--gold)">Cosmic Time Control</div>
+        <div class="dim">Accelerate time to watch planetary alignments in seconds via smooth lerp</div>
+      </div>
+      <div class="card card-gold" style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title" style="color:var(--gold)">Smart Camera Focus</div>
+        <div class="dim">Click any planet → smooth camera transition + orbit controls lock to target</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: COMMAND CENTER -->
+  <div class="slide" id="s8">
+    <div class="slide-tag">Feature Deep Dive</div>
+    <div class="slide-title">🖥️ The Zenith Command Center <span style="color:var(--dim);font-size:14px">/</span></div>
+    <div class="accent-bar"></div>
+    <div class="grid2" style="gap:14px;flex:1">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" style="border-color:rgba(168,85,247,0.45)">
+          <div class="label" style="color:var(--violet);margin-bottom:5px">🤖 Meet Orion — AI Guide</div>
+          <p class="dim">Integrated AI chatbot that answers space-related queries and guides users through the Zenith platform with character and immersive lore.</p>
+        </div>
+        <div class="card card-teal">
+          <div class="label" style="color:#22d3ee;margin-bottom:5px">📰 Interstellar News Network</div>
+          <p class="dim">Live feed of astronomical updates, scientific breakthroughs, and launch schedules. Mission Control calendar with Google Calendar integration.</p>
+        </div>
+        <div class="card card-gold">
+          <div class="label" style="color:var(--gold);margin-bottom:5px">📚 Knowledge Base</div>
+          <p class="dim">30+ curated entries covering orbital mechanics, black holes, exoplanets, Kessler Syndrome, dark matter — linked to authoritative sources.</p>
+        </div>
+      </div>
+      <div class="card" style="border-color:rgba(168,85,247,0.35)">
+        <div class="label" style="color:var(--violet);margin-bottom:10px">🎮 Hidden Extras</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div><div style="font-size:12px;font-weight:700;color:var(--white)">⬡ Sci-Fi Concept Archives</div><div class="dim">Classified cinematic space lore browsable in-app</div></div>
+          <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:8px"><div style="font-size:12px;font-weight:700;color:var(--white)">⬡ Zero-G Tether Game</div><div class="dim">Decrypt the sequence to save the astronaut — 8 domains, 3 difficulty levels</div></div>
+          <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:8px"><div style="font-size:12px;font-weight:700;color:var(--white)">⬡ Anomaly Logs</div><div class="dim">Space debris warnings and deep-space anomaly entries</div></div>
+          <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:8px"><div style="font-size:12px;font-weight:700;color:var(--white)">⬡ 3D Model Inspector</div><div class="dim">Rotate, zoom, inspect textured satellite models inside the radar</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: END-TO-END FLOW -->
+  <div class="slide" id="s9">
+    <div class="slide-tag">End-to-End Flow</div>
+    <div class="slide-title">Complete User Journey — Browser to Deep Space</div>
+    <div class="accent-bar"></div>
+    <div class="grid3" style="gap:9px;flex:1">
+      <div class="card card-teal"><div class="step-num" style="color:#22d3ee;font-size:22px">01</div><div class="step-title">User Lands</div><div class="dim">Next.js App Router serves Command Center over HTTPS from Vercel edge</div></div>
+      <div class="card card-teal"><div class="step-num" style="color:#22d3ee;font-size:22px">02</div><div class="step-title">Command Center</div><div class="dim">News hydrates. Orion AI initializes. Knowledge Base renders. Zero-G game ready</div></div>
+      <div class="card card-teal"><div class="step-num" style="color:#22d3ee;font-size:22px">03</div><div class="step-title">Navigate to Radar</div><div class="dim">/radar loads. Browser requests GPS permission. R3F canvas mounts</div></div>
+      <div class="card card-teal"><div class="step-num" style="color:#22d3ee;font-size:22px">04</div><div class="step-title">TLE Fetch</div><div class="dim">Live TLE data fetched from CelesTrak, dispatched to orbitalWorker.ts</div></div>
+      <div class="card card-teal"><div class="step-num" style="color:#22d3ee;font-size:22px">05</div><div class="step-title">SGP4 Propagation</div><div class="dim">Worker computes Lat/Lon/Alt for each satellite. Posts results to main thread</div></div>
+      <div class="card card-teal"><div class="step-num" style="color:#22d3ee;font-size:22px">06</div><div class="step-title">Globe Render</div><div class="dim">react-globe.gl paints holographic Earth with satellite orbit paths</div></div>
+      <div class="card card-teal"><div class="step-num" style="color:#22d3ee;font-size:22px">07</div><div class="step-title">Time Machine</div><div class="dim">Zustand store updates → globe re-renders past/future orbital positions</div></div>
+      <div class="card card-teal"><div class="step-num" style="color:#22d3ee;font-size:22px">08</div><div class="step-title">Solar System</div><div class="dim">Three.js scene: 8 planets, asteroid belt, missions. NASA EPIC API fetches Earth photo</div></div>
+      <div class="card card-teal"><div class="step-num" style="color:#22d3ee;font-size:22px">09</div><div class="step-title">Interact &amp; Explore</div><div class="dim">Click planet → camera lerps and locks. Speed up time to watch alignments live</div></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: BUNDLER CHALLENGES -->
+  <div class="slide" id="s10">
+    <div class="slide-tag">Technical Deep Dive</div>
+    <div class="slide-title">Advanced Bundler Config — The Hard Parts</div>
+    <div class="accent-bar"></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:10px">
+      <div class="challenge-card">
+        <div class="prob"><div class="prob-label">❌ Problem</div><div style="font-size:11px;font-weight:700;color:#fca5a5;margin-bottom:4px">WebAssembly in Next.js 16</div><p class="dim">satellite.js uses em-pthread WebAssembly importing Node.js modules (worker_threads, module). Turbopack throws UnhandledSchemeError in browser.</p></div>
+        <div class="sol"><div class="sol-label">✅ Fix</div><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px">Turbopack + Webpack Hybrid</div><p class="dim">turbo.resolveAlias maps node: schemes to empty.js in dev. In production, Webpack NormalModuleReplacementPlugin strips illegal prefixes.</p></div>
+      </div>
+      <div class="challenge-card">
+        <div class="prob"><div class="prob-label">❌ Problem</div><div style="font-size:11px;font-weight:700;color:#fca5a5;margin-bottom:4px">RSC Bailout Crashes Three.js</div><p class="dim">WebGL Canvas uses useSearchParams() from next/navigation. RSC boundaries cause bailout errors that crash the Three.js context entirely.</p></div>
+        <div class="sol"><div class="sol-label">✅ Fix</div><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px">Client-Side Suspense Isolation</div><p class="dim">Canvas initializations wrapped in Suspense boundaries. Three.js kept in pure client components, fully isolated from RSC.</p></div>
+      </div>
+      <div class="challenge-card">
+        <div class="prob"><div class="prob-label">❌ Problem</div><div style="font-size:11px;font-weight:700;color:#fca5a5;margin-bottom:4px">Three.js Barrel Export Leaks</div><p class="dim">three and @react-three use barrel exports causing memory leaks during Next.js server-side bundling due to module graph over-inclusion.</p></div>
+        <div class="sol"><div class="sol-label">✅ Fix</div><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px">transpilePackages</div><p class="dim">next.config.ts forces Next.js to fully transpile three and @react-three, eliminating barrel-export memory leaks in production.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: PERFORMANCE & DESIGN -->
+  <div class="slide" id="s11">
+    <div class="slide-tag">Performance &amp; Design</div>
+    <div class="slide-title">What Makes Zenith Stand Out</div>
+    <div class="accent-bar"></div>
+    <div class="grid2" style="gap:14px;flex:1">
+      <div class="card card-cyan">
+        <div class="label" style="color:var(--cyan);margin-bottom:10px">⚡ Performance</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="font-size:18px;font-weight:700;color:var(--gold);font-family:'Space Mono',monospace;min-width:60px">60 FPS</span><span class="dim">Sustained during live satellite tracking</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="font-size:14px;font-weight:700;color:var(--cyan);font-family:'Space Mono',monospace;min-width:60px">0ms</span><span class="dim">UI jank — Web Worker offloads all math</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="font-size:14px;font-weight:700;color:var(--green);font-family:'Space Mono',monospace;min-width:60px">Zero</span><span class="dim">Installs required — runs in any browser</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="font-size:14px;font-weight:700;color:var(--violet);font-family:'Space Mono',monospace;min-width:60px">Edge</span><span class="dim">Vercel CDN — global low latency</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0"><span style="font-size:14px;font-weight:700;color:var(--gold);font-family:'Space Mono',monospace;min-width:60px">Live</span><span class="dim">TLE data refreshes in real time from CelesTrak</span></div>
+        </div>
+      </div>
+      <div class="card" style="border-color:rgba(168,85,247,0.4)">
+        <div class="label" style="color:var(--violet);margin-bottom:10px">🎨 Design Language</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><div style="font-size:12px;font-weight:700;color:var(--violet)">Glassmorphism</div><div class="dim">Frosted glass cards with neon glow borders throughout</div></div>
+          <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><div style="font-size:12px;font-weight:700;color:var(--violet)">Dark Mode First</div><div class="dim">Deep space palette — near-black bg with neon cyan/purple accents</div></div>
+          <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><div style="font-size:12px;font-weight:700;color:var(--violet)">Immersive Lore</div><div class="dim">Sci-fi copy, anomaly logs, and Orion AI add narrative depth</div></div>
+          <div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><div style="font-size:12px;font-weight:700;color:var(--violet)">Holographic Globe</div><div class="dim">Satellite imagery, bump maps, day/night cycle, cloud layer</div></div>
+          <div style="padding:6px 0"><div style="font-size:12px;font-weight:700;color:var(--violet)">Responsive</div><div class="dim">Works across desktop and mobile viewports</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: COMPETITION FIT -->
+  <div class="slide" id="s12">
+    <div class="slide-tag">Competition Fit</div>
+    <div class="slide-title">AstralWeb Innovate — "On This Day, But Make It Cosmic"</div>
+    <div class="accent-bar"></div>
+    <div class="grid2" style="gap:10px;flex:1">
+      <div class="card card-green"><div class="label" style="color:var(--green);margin-bottom:5px">🌌 Theme Alignment</div><p class="dim">Entirely cosmic — satellites, planets, missions, and deep-space phenomena are the core, not an add-on. The theme is baked in from architecture to aesthetic.</p></div>
+      <div class="card card-green"><div class="label" style="color:var(--green);margin-bottom:5px">🕹️ Interactivity</div><p class="dim">3D draggable globe, time-machine slider, solar system click-to-focus, Zero-G game, Orion AI chatbot, sidebar filters — multiple interactive elements.</p></div>
+      <div class="card card-green"><div class="label" style="color:var(--green);margin-bottom:5px">📱 Responsiveness</div><p class="dim">Tailwind CSS v4 responsive utilities. UI adapts from widescreen desktop to mobile viewport, tested for cross-platform compatibility.</p></div>
+      <div class="card card-green"><div class="label" style="color:var(--green);margin-bottom:5px">🔭 Cosmology Accuracy</div><p class="dim">SGP4 is the real NORAD algorithm. NASA EPIC API delivers genuine Earth imagery. Planetary orbital speeds and scales are mathematically accurate.</p></div>
+      <div class="card card-green"><div class="label" style="color:var(--green);margin-bottom:5px">💡 Originality</div><p class="dim">No template. Custom glassmorphic design system, original sci-fi lore, Orion AI persona, Sky Visibility Engine — unique to this project.</p></div>
+      <div class="card card-green"><div class="label" style="color:var(--green);margin-bottom:5px">✅ Round 3: Functionality</div><p class="dim">All features live and testable at project-zenith-srm.vercel.app. Performance, usability, and cosmological accuracy verifiable by judges in real time.</p></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: CLOSING -->
+  <div class="slide" id="s13">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center">
+      <div class="closing-title" style="color:var(--white)">THANK<br><span style="color:var(--cyan)">YOU</span></div>
+      <div style="font-size:14px;font-style:italic;color:var(--violet);letter-spacing:2px;margin:14px 0 24px;font-family:'Space Mono',monospace">The Universe Awaits</div>
+      <div class="url-box" style="width:100%;max-width:500px">
+        <div class="dim" style="font-size:10px;margin-bottom:4px">🌐 Live Platform</div>
+        <a href="https://project-zenith-srm.vercel.app" style="color:var(--cyan);font-family:'Space Mono',monospace;font-size:15px;font-weight:700;text-decoration:none">project-zenith-srm.vercel.app</a>
+      </div>
+      <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.3);border-radius:12px;padding:12px 20px;text-align:center;margin:8px 0;width:100%;max-width:500px">
+        <div class="dim" style="font-size:10px;margin-bottom:4px">📦 Repository</div>
+        <a href="https://github.com/02-rfq-07/Zenith" style="color:var(--violet);font-family:'Space Mono',monospace;font-size:13px;font-weight:700;text-decoration:none">github.com/02-rfq-07/Zenith</a>
+      </div>
+      <div class="grid4" style="margin-top:20px;width:100%;max-width:560px">
+        <div class="card card-teal stat-big"><div class="num" style="color:#22d3ee;font-size:28px">3</div><div class="lbl">Modules</div></div>
+        <div class="card card-gold stat-big"><div class="num" style="color:var(--gold);font-size:28px">8</div><div class="lbl">Planets</div></div>
+        <div class="card card-cyan stat-big"><div class="num" style="color:var(--cyan);font-size:28px">60</div><div class="lbl">FPS</div></div>
+        <div class="card" style="border-color:rgba(168,85,247,0.4);text-align:center"><div class="num" style="color:var(--violet);font-size:28px">∞</div><div class="lbl">Space</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <div class="nav">
+    <button class="nav-btn" id="prev-btn" disabled onclick="navigate(-1)">← Prev</button>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="nav-dots" id="dots"></div>
+      <span class="slide-counter" id="counter">1 / 13</span>
+    </div>
+    <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+const TOTAL = 13;
+let current = 1;
+
+function renderDots() {
+  const c = document.getElementById('dots');
+  c.innerHTML = '';
+  for (let i = 1; i <= TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === current ? ' on' : '');
+    d.onclick = () => goTo(i);
+    c.appendChild(d);
+  }
+}
+
+function goTo(n) {
+  document.getElementById('s' + current).classList.remove('active');
+  current = n;
+  const sl = document.getElementById('s' + current);
+  sl.classList.add('active');
+  sl.style.animation = 'none';
+  sl.offsetHeight;
+  sl.style.animation = '';
+  document.getElementById('prev-btn').disabled = current === 1;
+  document.getElementById('next-btn').disabled = current === TOTAL;
+  document.getElementById('counter').textContent = current + ' / ' + TOTAL;
+  document.getElementById('prog').style.width = ((current / TOTAL) * 100) + '%';
+  renderDots();
+}
+
+function navigate(dir) {
+  const n = current + dir;
+  if (n >= 1 && n <= TOTAL) goTo(n);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+});
+
+renderDots();
+document.getElementById('prog').style.width = ((1 / TOTAL) * 100) + '%';
+
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+let raf;
+
+function initStars() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  stars = [];
+  for (let i = 0; i < 160; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.2 + 0.2,
+      o: Math.random() * 0.6 + 0.2,
+      s: Math.random() * 0.008 + 0.003,
+      t: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function drawStars(ts) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.t += s.s;
+    const o = s.o * (0.5 + 0.5 * Math.sin(s.t));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,' + o + ')';
+    ctx.fill();
+  });
+  raf = requestAnimationFrame(drawStars);
+}
+
+initStars();
+drawStars();
+window.addEventListener('resize', () => { initStars(); });
+</script>
